@@ -13,7 +13,6 @@ import {
 } from "react-native";
 import { images } from "@/constants/images";
 
-// Define a type for the news item from NewsAPI
 interface NewsItem {
   url: string;
   urlToImage?: string;
@@ -25,7 +24,6 @@ interface NewsItem {
   };
 }
 
-// Add type definition for Card component props
 interface CardProps {
   item: NewsItem;
   onPress: () => void;
@@ -34,14 +32,14 @@ interface CardProps {
 const formatDate = (dateString: string) => {
   const date = new Date(dateString);
   
-  // Format date
+ 
   const formattedDate = date.toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
     day: 'numeric'
   });
 
-  // Format time
+
   const formattedTime = date.toLocaleTimeString('en-US', {
     hour: '2-digit',
     minute: '2-digit',
@@ -63,13 +61,13 @@ const Card: React.FC<CardProps> = ({ item, onPress }) => {
         <Image 
           className="w-full h-48 object-cover" 
           source={{ uri: item.urlToImage }} 
-          defaultSource={images.newsbox} // Fallback image
+          defaultSource={images.newsbox} 
         />
       ) : (
         <View className="w-full h-48 bg-gray-200 items-center justify-center">
           <Image 
             source={images.newsbox} 
-            className="w-24 h-24 opacity-50" 
+            className="w-24 h-24 opacity-100" 
             resizeMode="contain"
           />
         </View>
