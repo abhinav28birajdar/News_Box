@@ -3,8 +3,8 @@ import React from 'react'
 
 const camera = () => {
   return (
-    <View>
-      <Text>camera</Text>
+    <View className=' flex-1 justify-center items-center'>
+      <Text className='text-7xl text-indigo-500 text-Bold'>Camera</Text>
     </View>
   )
 }
