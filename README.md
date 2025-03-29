@@ -45,7 +45,7 @@ News Box is a React Native application built using Expo, TypeScript, and Tailwin
 
 ### Home Screen
 Displays a list of news articles with headlines, images, and brief descriptions in an elegant layout.
-[<!-- Uploading "WhatsApp Image 2025-03-29 at 16.39.47_38cd0174.jpg"... -->](https://github.com/abhinav28birajdar/News_Morning/blob/master/WhatsApp%20Image%202025-03-29%20at%2016.39.47_38cd0174.jpg?raw=true)
+(https://github.com/abhinav28birajdar/News_Morning/blob/master/WhatsApp%20Image%202025-03-29%20at%2016.39.47_38cd0174.jpg?raw=true)
 
 ### Article Detail Screen
 Shows the full content of a selected article with a smooth transition from the home screen.
