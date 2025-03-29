@@ -5,25 +5,23 @@ import { StyleSheet, Text, TouchableOpacity, View, Image, Button, Alert } from '
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { Video, ResizeMode } from 'expo-av';
 import * as MediaLibrary from 'expo-media-library';
-// Remove Sharing if it's only used for the original "Post" button
-// import * as Sharing from 'expo-sharing';
+
 import { MaterialIcons } from '@expo/vector-icons';
 
-// --- Navigation Imports ---
+
 import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
-// --- Import or define the SAME RootStackParamList used in CreatePostScreen ---
-import { RootStackParamList } from '../path/to/your/CreatePostScreen'; // Adjust path
+import { RootStackParamList } from '../path/to/your/CreatePostScreen';
 
-// Define Types for this specific screen's route and navigation
+
 type CameraScreenRouteProp = RouteProp<RootStackParamList, 'CameraScreen'>;
 type CameraScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'CameraScreen'>;
 
 
 type FacingType = 'front' | 'back';
 
-export default function CameraScreen() { // Renamed from App if it was previously App
+export default function CameraScreen() { 
   const [facing, setFacing] = useState<FacingType>('back');
   const [cameraPermission, requestCameraPermission] = useCameraPermissions();
   const [mediaPermission, requestMediaPermission] = MediaLibrary.usePermissions();
@@ -32,22 +30,20 @@ export default function CameraScreen() { // Renamed from App if it was previousl
   const [videoUri, setVideoUri] = useState<string | null>(null);
   const cameraRef = useRef<CameraView>(null);
 
-  // --- Navigation Hooks ---
+
   const route = useRoute<CameraScreenRouteProp>();
   const navigation = useNavigation<CameraScreenNavigationProp>();
 
-  // --- Get the callback from route params ---
+
   const onMediaCapturedCallback = route.params?.onMediaCaptured;
 
   useEffect(() => {
-    // You might not need media library permission if ONLY passing back to CreatePost
-    // Keep it if you still want a "Save" option sometimes, or remove if not.
+
     if (!mediaPermission?.granted && mediaPermission?.canAskAgain) {
-       // Optionally request: requestMediaPermission();
+    
     }
   }, [mediaPermission]);
 
-  // --- Permission Handling (remains similar) ---
    if (!cameraPermission) {
       return <View style={styles.centered}><Text>Loading Permissions...</Text></View>;
    }
@@ -59,8 +55,7 @@ export default function CameraScreen() { // Renamed from App if it was previousl
            </View>
        );
    }
-   // Decide if MediaLibrary permission is strictly needed for the CreatePost flow
-   // If not, you can conditionally render this or remove it when onMediaCapturedCallback exists
+
     if (!onMediaCapturedCallback && !mediaPermission?.granted) {
      return (
        <View style={styles.permissionContainer}>
@@ -76,8 +71,7 @@ export default function CameraScreen() { // Renamed from App if it was previousl
   async function startRecording() { /* ... */ }
   async function stopRecording() { /* ... */ }
 
-  // --- Media Handling ---
-  // Keep saveMedia ONLY if you still want a Save button in some cases
+
    async function saveMedia(uri: string, type: 'photo' | 'video') {
      if (!mediaPermission?.granted) {
          Alert.alert("Permission Denied", "Cannot save without Media Library permission.");
@@ -86,14 +80,14 @@ export default function CameraScreen() { // Renamed from App if it was previousl
      try {
          await MediaLibrary.saveToLibraryAsync(uri);
          Alert.alert("Saved!", `${type === 'photo' ? 'Photo' : 'Video'} saved to gallery.`);
-         // Decide if you want to retake or go back after saving
-         handleRetake(); // Example: Go back to camera view after saving
+         
+         handleRetake(); 
      } catch (error) {
          Alert.alert("Error", "Could not save to gallery.");
      }
    }
 
-  // This function is now used to go back to the camera view (discard preview)
+  
   function handleRetake() {
     setPhotoUri(null);
     setVideoUri(null);
@@ -102,10 +96,10 @@ export default function CameraScreen() { // Renamed from App if it was previousl
 
   // --- Rendering ---
 
-  // Preview Screen
+
   if (photoUri || videoUri) {
     const isPhoto = !!photoUri;
-    const currentUri = isPhoto ? photoUri! : videoUri!; // Assert non-null as we are inside the check
+    const currentUri = isPhoto ? photoUri! : videoUri!; 
 
     return (
       <View style={styles.previewContainer}>
@@ -168,7 +162,7 @@ export default function CameraScreen() { // Renamed from App if it was previousl
     );
   }
 
-  // Camera View (remains largely the same)
+  
   return (
     <View style={styles.container}>
       <CameraView ref={cameraRef} style={styles.camera} facing={facing} mode={isRecording ? 'video' : 'picture'} videoQuality={'720p'}>
@@ -196,7 +190,7 @@ export default function CameraScreen() { // Renamed from App if it was previousl
   );
 }
 
-// --- Styles (Use the same StyleSheet from the previous CameraScreen example) ---
+
 const styles = StyleSheet.create({
     // ... (Include all the styles: container, centered, permissionContainer, camera, buttonContainer, iconButton, captureButton, previewContainer, preview, previewControls, etc.)
     // Add any missing styles from the previous CameraScreen version

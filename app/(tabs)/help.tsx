@@ -1,10 +1,11 @@
 import { StyleSheet, Text, View } from 'react-native'
 import React from 'react'
 
-const help = () => {
+interface HelpProps{}
+const help:React.FC<HelpProps> = () => {
   return (
-    <View>
-      <Text>help</Text>
+    <View className=' flex-1 justify-center items-center'>
+      <Text className='text-indigo-600 text-bold text-5xl'>help</Text>
     </View>
   )
 }
