@@ -14,7 +14,7 @@ import { useRouter } from "expo-router";
 import { Search, X } from "lucide-react-native";
 import { StatusBar } from "expo-status-bar";
 import { useTheme } from "@/context/theme-context";
-import { useNewsStore } from "@/store/news-store";
+import { useNewsStore, Article } from "@/store/news-store";
 import NewsCard from "@/components/NewsCard";
 import CategoryPills from "@/components/CategoryPills";
 
@@ -32,7 +32,7 @@ export default function HomeScreen() {
   } = useNewsStore();
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [filteredNews, setFilteredNews] = useState(news);
+  const [filteredNews, setFilteredNews] = useState<Article[]>(news);
 
   useEffect(() => {
     fetchNews();
@@ -57,7 +57,7 @@ export default function HomeScreen() {
     setRefreshing(false);
   };
 
-  const handleArticlePress = (id) => {
+  const handleArticlePress = (id: string) => {
     router.push(`/article/${id}`);
   };
 

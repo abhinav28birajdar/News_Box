@@ -1,171 +1,98 @@
 import { create } from "zustand";
-import { persist, createJSONStorage } from "zustand/middleware";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { supabase, Profile } from "@/lib/supabase"; //  Adjust path if needed
-import { Session, User as SupabaseUser } from "@supabase/supabase-js";
+import { createClient } from "@supabase/supabase-js";
 
-interface AuthStoreUser extends Profile { // Combine SupabaseUser and your Profile type
-  email?: string; // From SupabaseUser
+// Initialize Supabase client
+const supabaseUrl = "YOUR_SUPABASE_URL";
+const supabaseKey = "YOUR_SUPABASE_API_KEY";
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+// Define Article type
+export interface Article {
+  id: string;
+  title: string;
+  description: string;
+  content: string;
+  urlToImage: string;
+  publishedAt: string;
+  source: { name: string };
+  author: string;
+  category: string;
 }
 
-interface AuthStore {
-  user: AuthStoreUser | null;
-  session: Session | null;
-  isAuthenticated: boolean; // Derived from session
+// Define the store state
+interface NewsStore {
+  news: Article[];
   loading: boolean;
-  initializeAuth: () => Promise<void>;
-  loginWithPassword: (email: string, password: string) => Promise<void>;
-  signupWithPassword: (email: string, password: string, fullName: string) => Promise<void>;
-  logout: () => Promise<void>;
-  setSession: (session: Session | null) => void; // For external session updates
+  error: string | null;
+  selectedCategory: string;
+  fetchNews: () => Promise<void>;
+  addNews: (article: Article) => Promise<void>;
+  setSelectedCategory: (category: string) => void;
 }
 
-export const useAuthStore = create<AuthStore>()(
-  persist(
-    (set, get) => ({
-      user: null,
-      session: null,
-      isAuthenticated: false,
-      loading: true, // Start with loading true
-
-      initializeAuth: async () => {
-        set({ loading: true });
-        const { data: { session }, error } = await supabase.auth.getSession();
-        if (session) {
-          const { data: profileData, error: profileError } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', session.user.id)
-            .single();
-
-          set({
-            session,
-            user: profileData ? { ...profileData, email: session.user.email } : { id: session.user.id, email: session.user.email },
-            isAuthenticated: true,
-            loading: false,
-          });
-        } else {
-          set({ session: null, user: null, isAuthenticated: false, loading: false });
-        }
-
-        const { data: authListener } = supabase.auth.onAuthStateChange(
-          async (_event, session) => {
-            if (session) {
-              const { data: profileData } = await supabase
-                .from('profiles')
-                .select('*')
-                .eq('id', session.user.id)
-                .single();
-              set({
-                session,
-                user: profileData ? { ...profileData, email: session.user.email } : { id: session.user.id, email: session.user.email },
-                isAuthenticated: true,
-                loading: false,
-              });
-            } else {
-              set({ session: null, user: null, isAuthenticated: false, loading: false });
-            }
-          }
-        );
-        // Consider returning authListener.subscription.unsubscribe for cleanup if needed elsewhere
-      },
-
-      loginWithPassword: async (email, password) => {
-        set({ loading: true });
-        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) {
-          set({ loading: false });
-          throw error;
-        }
-        if (data.session && data.user) {
-          const { data: profileData } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', data.user.id)
-            .single();
-          set({
-            session: data.session,
-            user: profileData ? { ...profileData, email: data.user.email } : { id: data.user.id, email: data.user.email },
-            isAuthenticated: true,
-            loading: false,
-          });
-        } else {
-           set({ loading: false });
-        }
-      },
-
-      signupWithPassword: async (email, password, fullName) => {
-        set({ loading: true });
-        const { data, error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            data: {
-              full_name: fullName, // This goes into raw_user_meta_data for the trigger
-            },
-          },
-        });
-        if (error) {
-          set({ loading: false });
-          throw error;
-        }
-        // The onAuthStateChange listener and trigger should handle setting the user profile
-        // Or you can explicitly set it here if the session is immediately available
-        if (data.session && data.user) {
-             const { data: profileData } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', data.user.id)
-            .single();
-          set({
-            session: data.session,
-            user: profileData ? { ...profileData, email: data.user.email } : { id: data.user.id, email: data.user.email },
-            isAuthenticated: true,
-            loading: false,
-          });
-        } else {
-            // User might need to confirm email
-            set({ loading: false });
-        }
-      },
-
-      logout: async () => {
-        set({ loading: true });
-        const { error } = await supabase.auth.signOut();
-        if (error) {
-          set({ loading: false });
-          throw error;
-        }
-        // onAuthStateChange will handle clearing session and user
-        set({ user: null, session: null, isAuthenticated: false, loading: false });
-      },
-      setSession: (session) => { // If you need to manually sync session from _layout
-         if (session) {
-            const { data: profileData } = supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', session.user.id)
-            .single()
-            .then(({data: profileData}) => {
-                set({
-                    session,
-                    user: profileData ? { ...profileData, email: session.user.email } : { id: session.user.id, email: session.user.email },
-                    isAuthenticated: true,
-                    loading: false,
-                  });
-            });
-        } else {
-            set({ session: null, user: null, isAuthenticated: false, loading: false });
-        }
+// Create the store with initial state and methods
+export const useNewsStore = create<NewsStore>((set, get) => ({
+  news: [],
+  loading: false,
+  error: null,
+  selectedCategory: "general",
+  
+  // Fetch news from Supabase
+  fetchNews: async () => {
+    const { selectedCategory } = get();
+    set({ loading: true, error: null });
+    
+    try {
+      // Query Supabase for news articles
+      let query = supabase.from("articles").select("*");
+      
+      // Filter by category if not "all"
+      if (selectedCategory !== "all") {
+        query = query.eq("category", selectedCategory);
       }
-    }),
-    {
-      name: "auth-storage",
-      storage: createJSONStorage(() => AsyncStorage),
-      partialize: (state) => ({ session: state.session }), // Only persist session
+      
+      // Order by published date (newest first)
+      const { data, error } = await query.order("publishedAt", { ascending: false });
+      
+      if (error) throw error;
+      
+      // Set the fetched news
+      set({ news: data as Article[], loading: false });
+    } catch (error) {
+      console.error("Error fetching news:", error);
+      set({ 
+        error: "Failed to fetch news. Please try again later.", 
+        loading: false 
+      });
     }
-  )
-);
-
-// Call initializeAuth when the app loads (e.g., in your root layout)
-// useAuthStore.getState().initializeAuth(); // Or do it in a useEffect in _layout.tsx
+  },
+  
+  // Add a new news article
+  addNews: async (article: Article) => {
+    set({ loading: true, error: null });
+    
+    try {
+      // Insert new article into Supabase
+      const { error } = await supabase.from("articles").insert(article);
+      
+      if (error) throw error;
+      
+      // Update the local state with the new article
+      set((state) => ({
+        news: [article, ...state.news],
+        loading: false
+      }));
+    } catch (error) {
+      console.error("Error adding news:", error);
+      set({ 
+        error: "Failed to add news. Please try again later.", 
+        loading: false 
+      });
+    }
+  },
+  
+  // Set the selected category
+  setSelectedCategory: (category: string) => {
+    set({ selectedCategory: category });
+  }
+}));
