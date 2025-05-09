@@ -1,109 +1,61 @@
-// app/(tabs)/_layout.tsx
-import React from 'react';
-import { Tabs, Redirect } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
-import { Image, ActivityIndicator, View } from "react-native";
-import { useAuth } from "@/context/AuthContext"; // Adjust path
-import { Profile } from '@/lib/supabase'; // Import Profile type
-
-interface AccountTabIconProps {
-  color: string;
-  size: number;
-}
-
-// Define the Icon Component specific to the Tabs Layout
-function AccountTabIcon({ color, size }: AccountTabIconProps) {
-  // Use auth context HERE where it's needed for the icon
-  const { session, profile, loadingInitial, loadingAuthAction } = useAuth();
-
-  // Show spinner only if auth actions are happening *after* initial load
-  const isLoading = loadingAuthAction; // Or combine if needed: loadingInitial || loadingAuthAction
-
-  if (isLoading) {
-      return <ActivityIndicator size="small" color={color} />;
-  }
-
-  const avatarUrl = profile?.avatar_url;
-
-  if (session && avatarUrl) {
-    return (
-      <Image
-        source={{ uri: avatarUrl }}
-        style={{ width: size, height: size, borderRadius: size / 2 }}
-        onError={(e) => console.log("Error loading avatar in tab:", e.nativeEvent.error)}
-      />
-    );
-  }
-
-  return <Ionicons name="person-outline" size={size} color={color} />;
-}
-
+import React from "react";
+import { Tabs } from "expo-router";
+import { useColorScheme } from "react-native";
+import { Home, Compass, PlusSquare, User } from "lucide-react-native";
+import { useTheme } from "@/context/theme-context";
 
 export default function TabLayout() {
-    const { session, loadingInitial } = useAuth();
-
-
-    if (loadingInitial) {
-       return <View className="flex-1 justify-center items-center bg-black"><ActivityIndicator size="large" color="white" /></View>; // Or null
-    }
-
-    
-
+  const { theme } = useTheme();
+  const colors = theme.colors;
 
   return (
     <Tabs
       screenOptions={{
-        tabBarStyle: { backgroundColor: "black", height: 60, borderTopWidth: 0 },
-        tabBarLabelStyle: { fontSize: 14, fontWeight: "bold" },
-        tabBarActiveTintColor: "white",
-        tabBarInactiveTintColor: "gray",
-        headerShown: false, // Hide headers for all tab screens by default
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.textSecondary,
+        tabBarStyle: {
+          backgroundColor: colors.background,
+          borderTopColor: colors.border,
+          height: 60,
+          paddingBottom: 10,
+        },
+        headerStyle: {
+          backgroundColor: colors.background,
+        },
+        headerTintColor: colors.text,
+        headerShadowVisible: false,
       }}
     >
       <Tabs.Screen
-        name="index" // This corresponds to app/(tabs)/index.tsx
+        name="index"
         options={{
           title: "Home",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home-outline" size={size} color={color} />
-          ),
+          tabBarIcon: ({ color }) => <Home size={22} color={color} />,
+          headerTitle: "News Box",
         }}
       />
       <Tabs.Screen
-        name="create" // app/(tabs)/create.tsx
+        name="categories"
         options={{
-          title: "Create",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="create-outline" size={size} color={color} />
-          ),
-        }}
-      />
-       <Tabs.Screen
-        name="camera" // app/(tabs)/camera.tsx
-        options={{
-          title: "Camera",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="camera-outline" size={size} color={color} />
-          ),
+          title: "Categories",
+          tabBarIcon: ({ color }) => <Compass size={22} color={color} />,
+          headerTitle: "Categories",
         }}
       />
       <Tabs.Screen
-        name="help" // app/(tabs)/help.tsx
+        name="post"
         options={{
-          title: "Help",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="help-circle-outline" size={size} color={color} />
-          ),
+          title: "Post News",
+          tabBarIcon: ({ color }) => <PlusSquare size={22} color={color} />,
+          headerTitle: "Post News",
         }}
       />
       <Tabs.Screen
-        name="account" // app/(tabs)/account.tsx
+        name="profile"
         options={{
-          title: "Account",
-          tabBarIcon: ({ color, size }) => (
-            // Render the icon component which uses the context
-            <AccountTabIcon color={color} size={size} />
-          ),
+          title: "Profile",
+          tabBarIcon: ({ color }) => <User size={22} color={color} />,
+          headerTitle: "Profile",
         }}
       />
     </Tabs>

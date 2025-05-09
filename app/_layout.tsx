@@ -1,51 +1,78 @@
-import React, { useEffect } from 'react';
-import { SplashScreen, Stack } from "expo-router";
-import { ActivityIndicator, View } from "react-native";
-import "@/global.css";
-import { AuthProvider, useAuth } from "@/context/AuthContext";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { useFonts } from "expo-font";
+import { Stack } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
+import { useEffect } from "react";
+import { Platform } from "react-native";
+import { ErrorBoundary } from "./error-boundary";
+import { ThemeProvider } from "@/context/theme-context";
 
+export const unstable_settings = {
+  initialRouteName: "(tabs)",
+};
+
+// Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
-function RootAppLayout() {
-  const { session, loadingInitial } = useAuth();
+export default function RootLayout() {
+  const [loaded, error] = useFonts({
+    ...FontAwesome.font,
+  });
 
   useEffect(() => {
-    if (!loadingInitial) {
+    if (error) {
+      console.error(error);
+      throw error;
+    }
+  }, [loaded]);
+
+  useEffect(() => {
+    if (loaded) {
       SplashScreen.hideAsync();
     }
-  }, [loadingInitial]);
+  }, [loaded]);
 
-  if (loadingInitial) {
-    return (
-      <View className="flex-1 justify-center items-center bg-black">
-        <ActivityIndicator size="large" color="white" />
-      </View>
-    );
+  if (!loaded) {
+    return null;
   }
 
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      {!session ? (
-        <>
-          <Stack.Screen name="sign-in" />
-          <Stack.Screen name="sign-up" />
-          <Stack.Screen name="(tabs)" redirect={true} />
-        </>
-      ) : (
-        <>
-          <Stack.Screen name="(tabs)" />
-          <Stack.Screen name="sign-in" redirect={true} />
-          <Stack.Screen name="sign-up" redirect={true} />
-        </>
-      )}
-    </Stack>
+    <ErrorBoundary>
+      <ThemeProvider>
+        <RootLayoutNav />
+      </ThemeProvider>
+    </ErrorBoundary>
   );
 }
 
-export default function RootLayout() {
+function RootLayoutNav() {
   return (
-    <AuthProvider>
-      <RootAppLayout />
-    </AuthProvider>
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      <Stack.Screen 
+        name="article/[id]" 
+        options={{ 
+          headerShown: true,
+          headerTitle: "Article",
+          headerBackTitle: "Back",
+          headerTintColor: "#3B82F6",
+          headerStyle: { backgroundColor: "#FFFFFF" },
+        }} 
+      />
+      <Stack.Screen 
+        name="auth/login" 
+        options={{ 
+          headerShown: false,
+          presentation: "modal" 
+        }} 
+      />
+      <Stack.Screen 
+        name="auth/signup" 
+        options={{ 
+          headerShown: false,
+          presentation: "modal" 
+        }} 
+      />
+    </Stack>
   );
 }
