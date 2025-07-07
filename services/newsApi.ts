@@ -1,7 +1,8 @@
-const API_KEY = "YOUR_NEWSAPI_KEY"; // Replace with your NewsAPI key
+const API_KEY = ""; // NewsAPI key placed here
 const BASE_URL = "https://newsapi.org/v2";
 
 interface Article {
+  id: string;
   source: { id: string | null; name: string };
   author: string | null;
   title: string;
@@ -15,7 +16,11 @@ interface Article {
 interface NewsApiResponse {
   status: string;
   totalResults: number;
-  articles: Article[];
+  articles: Omit<Article, 'id'>[];
+}
+
+function addIdToArticles(articles: Omit<Article, 'id'>[]): Article[] {
+  return articles.map((article) => ({ ...article, id: article.url }));
 }
 
 export const getTopHeadlines = async (category?: string): Promise<Article[]> => {
@@ -28,7 +33,7 @@ export const getTopHeadlines = async (category?: string): Promise<Article[]> => 
     const data: NewsApiResponse = await response.json();
 
     if (data.status === "ok") {
-      return data.articles;
+      return addIdToArticles(data.articles);
     } else {
       console.error("NewsAPI Error:", data);
       return [];
@@ -46,7 +51,7 @@ export const searchNews = async (query: string): Promise<Article[]> => {
     const data: NewsApiResponse = await response.json();
 
     if (data.status === "ok") {
-      return data.articles;
+      return addIdToArticles(data.articles);
     } else {
       console.error("NewsAPI Error:", data);
       return [];

@@ -1,4 +1,4 @@
-package com.iabhinavv28.News_app
+package com.newsapp
 
 import android.app.Application
 import android.content.res.Configuration
