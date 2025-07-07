@@ -6,6 +6,7 @@ import { useEffect } from "react";
 import { Platform } from "react-native";
 import { ErrorBoundary } from "./error-boundary";
 import { ThemeProvider } from "@/context/theme-context";
+import { AuthProvider } from "@/context/AuthContext";
 
 export const unstable_settings = {
   initialRouteName: "(tabs)",
@@ -39,7 +40,9 @@ export default function RootLayout() {
   return (
     <ErrorBoundary>
       <ThemeProvider>
-        <RootLayoutNav />
+        <AuthProvider>
+          <RootLayoutNav />
+        </AuthProvider>
       </ThemeProvider>
     </ErrorBoundary>
   );

@@ -14,7 +14,18 @@ import { useRouter } from "expo-router";
 import { Search, X } from "lucide-react-native";
 import { StatusBar } from "expo-status-bar";
 import { useTheme } from "@/context/theme-context";
-import { useNewsStore, Article } from "@/store/news-store";
+import { getTopHeadlines, searchNews } from "../../services/newsApi";
+
+interface Article {
+  source: { id: string | null; name: string };
+  author: string | null;
+  title: string;
+  description: string | null;
+  url: string;
+  urlToImage: string | null;
+  publishedAt: string;
+  content: string | null;
+}
 import NewsCard from "@/components/NewsCard";
 import CategoryPills from "@/components/CategoryPills";
 
@@ -22,38 +33,55 @@ export default function HomeScreen() {
   const router = useRouter();
   const { theme } = useTheme();
   const colors = theme.colors;
-  const { 
-    news, 
-    loading, 
-    error, 
-    fetchNews, 
-    selectedCategory,
-    setSelectedCategory 
-  } = useNewsStore();
+  const [news, setNews] = useState<Article[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+
+  const fetchNews = async (category?: string, query?: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      let fetchedArticles: Article[] = [];
+      if (query) {
+        fetchedArticles = await searchNews(query);
+      } else {
+        fetchedArticles = await getTopHeadlines(category);
+      }
+      setNews(fetchedArticles);
+      setFilteredNews(fetchedArticles); // Update filtered news as well
+    } catch (err: any) {
+      setError("Failed to fetch news. Please try again later.");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredNews, setFilteredNews] = useState<Article[]>(news);
 
   useEffect(() => {
-    fetchNews();
+    fetchNews(selectedCategory || undefined);
   }, [selectedCategory]);
 
   useEffect(() => {
     if (searchQuery.trim() === "") {
       setFilteredNews(news);
     } else {
-      const filtered = news.filter(
-        (item) =>
-          item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          item.description.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-      setFilteredNews(filtered);
+      // No need to filter locally, searchNews will handle it
+      // This useEffect will now trigger a new API call for search
+      const delayDebounceFn = setTimeout(() => {
+        fetchNews(undefined, searchQuery);
+      }, 500); // Debounce search input
+
+      return () => clearTimeout(delayDebounceFn);
     }
   }, [searchQuery, news]);
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await fetchNews();
+    await fetchNews(selectedCategory || undefined, searchQuery || undefined);
     setRefreshing(false);
   };
 

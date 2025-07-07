@@ -13,20 +13,20 @@ import { Image } from "expo-image";
 import { useRouter, Link } from "expo-router";
 import { ArrowLeft, Mail, Lock, Eye, EyeOff } from "lucide-react-native";
 import { useTheme } from "@/context/theme-context";
-import { useAuthStore } from "@/store/auth-store";
+import { useAuth } from "@/context/AuthContext";
 
 export default function LoginScreen() {
   const router = useRouter();
   const { theme } = useTheme();
   const colors = theme.colors;
-  const { login } = useAuthStore();
+  const { signInWithPassword, loadingAuthAction } = useAuth();
   
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (!email.trim()) {
       setError("Email is required");
       return;
@@ -37,9 +37,15 @@ export default function LoginScreen() {
       return;
     }
 
-    // Mock login - in a real app, this would call an API
-    login({ email, name: email.split("@")[0] });
-    router.push("/");
+    setError(""); // Clear previous errors
+
+    const success = await signInWithPassword(email, password);
+    if (success) {
+      router.replace("/"); // Use replace to prevent going back to login
+    } else {
+      // Error message is already handled by signInWithPassword via Alert.alert
+      // You can add more specific error handling here if needed
+    }
   };
 
   return (
@@ -149,37 +155,14 @@ export default function LoginScreen() {
           <TouchableOpacity
             style={[styles.loginButton, { backgroundColor: colors.primary }]}
             onPress={handleLogin}
+            disabled={loadingAuthAction}
           >
-            <Text style={styles.loginButtonText}>Sign In</Text>
+            {loadingAuthAction ? (
+              <Text style={styles.loginButtonText}>Signing In...</Text>
+            ) : (
+              <Text style={styles.loginButtonText}>Sign In</Text>
+            )}
           </TouchableOpacity>
-
-          <View style={styles.dividerContainer}>
-            <View style={[styles.divider, { backgroundColor: colors.border }]} />
-            <Text style={[styles.dividerText, { color: colors.textSecondary }]}>
-              Or continue with
-            </Text>
-            <View style={[styles.divider, { backgroundColor: colors.border }]} />
-          </View>
-
-          <View style={styles.socialButtonsContainer}>
-            <TouchableOpacity
-              style={[
-                styles.socialButton,
-                { backgroundColor: colors.card, borderColor: colors.border }
-              ]}
-            >
-              <Text style={[styles.socialButtonText, { color: colors.text }]}>Google</Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity
-              style={[
-                styles.socialButton,
-                { backgroundColor: colors.card, borderColor: colors.border }
-              ]}
-            >
-              <Text style={[styles.socialButtonText, { color: colors.text }]}>Apple</Text>
-            </TouchableOpacity>
-          </View>
         </View>
 
         <View style={styles.footer}>

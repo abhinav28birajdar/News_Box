@@ -13,13 +13,13 @@ import { Image } from "expo-image";
 import { useRouter, Link } from "expo-router";
 import { ArrowLeft, Mail, Lock, Eye, EyeOff, User } from "lucide-react-native";
 import { useTheme } from "@/context/theme-context";
-import { useAuthStore } from "@/store/auth-store";
+import { useAuth } from "@/context/AuthContext";
 
 export default function SignupScreen() {
   const router = useRouter();
   const { theme } = useTheme();
   const colors = theme.colors;
-  const { login } = useAuthStore();
+  const { signUpWithPassword, loadingAuthAction } = useAuth();
   
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -29,7 +29,7 @@ export default function SignupScreen() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState("");
 
-  const handleSignup = () => {
+  const handleSignup = async () => {
     if (!name.trim()) {
       setError("Name is required");
       return;
@@ -50,9 +50,15 @@ export default function SignupScreen() {
       return;
     }
 
-    // Mock signup - in a real app, this would call an API
-    login({ email, name });
-    router.push("/");
+    setError(""); // Clear previous errors
+
+    const success = await signUpWithPassword(email, password, name);
+    if (success) {
+      router.replace("/"); // Use replace to prevent going back to signup
+    } else {
+      // Error message is already handled by signUpWithPassword via Alert.alert
+      // You can add more specific error handling here if needed
+    }
   };
 
   return (
@@ -213,37 +219,14 @@ export default function SignupScreen() {
           <TouchableOpacity
             style={[styles.signupButton, { backgroundColor: colors.primary }]}
             onPress={handleSignup}
+            disabled={loadingAuthAction}
           >
-            <Text style={styles.signupButtonText}>Sign Up</Text>
+            {loadingAuthAction ? (
+              <Text style={styles.signupButtonText}>Signing Up...</Text>
+            ) : (
+              <Text style={styles.signupButtonText}>Sign Up</Text>
+            )}
           </TouchableOpacity>
-
-          <View style={styles.dividerContainer}>
-            <View style={[styles.divider, { backgroundColor: colors.border }]} />
-            <Text style={[styles.dividerText, { color: colors.textSecondary }]}>
-              Or continue with
-            </Text>
-            <View style={[styles.divider, { backgroundColor: colors.border }]} />
-          </View>
-
-          <View style={styles.socialButtonsContainer}>
-            <TouchableOpacity
-              style={[
-                styles.socialButton,
-                { backgroundColor: colors.card, borderColor: colors.border }
-              ]}
-            >
-              <Text style={[styles.socialButtonText, { color: colors.text }]}>Google</Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity
-              style={[
-                styles.socialButton,
-                { backgroundColor: colors.card, borderColor: colors.border }
-              ]}
-            >
-              <Text style={[styles.socialButtonText, { color: colors.text }]}>Apple</Text>
-            </TouchableOpacity>
-          </View>
         </View>
 
         <View style={styles.footer}>

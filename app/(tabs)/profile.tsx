@@ -5,20 +5,15 @@ import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { LogOut, Moon, Sun, Settings, Edit3 } from "lucide-react-native";
 import { useTheme } from "@/context/theme-context";
-import { useAuthStore } from "@/store/auth-store";
-import { useNewsStore } from "@/store/news-store";
+import { useAuth } from "@/context/AuthContext";
 
 export default function ProfileScreen() {
   const router = useRouter();
   const { theme, toggleTheme } = useTheme();
   const colors = theme.colors;
-  const { user, logout } = useAuthStore();
-  const { news } = useNewsStore();
+  const { user, profile, signOut } = useAuth();
 
-  // Filter news posted by the current user
-  const userPosts = news.filter(article => article.source.name === "User Generated");
-
-  const handleLogout = () => {
+  const handleLogout = async () => {
     Alert.alert(
       "Logout",
       "Are you sure you want to logout?",
@@ -29,9 +24,9 @@ export default function ProfileScreen() {
         },
         {
           text: "Logout",
-          onPress: () => {
-            logout();
-            router.push("/auth/login");
+          onPress: async () => {
+            await signOut();
+            router.replace("/auth/login");
           },
           style: "destructive"
         }
@@ -64,29 +59,12 @@ export default function ProfileScreen() {
           {user ? (
             <>
               <Image
-                source={{ uri: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=1000&auto=format&fit=crop" }}
+                source={{ uri: profile?.avatar_url || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=1000&auto=format&fit=crop" }}
                 style={styles.avatar}
               />
-              <Text style={[styles.userName, { color: colors.text }]}>{user.name}</Text>
+              <Text style={[styles.userName, { color: colors.text }]}>{profile?.username || "User"}</Text>
               <Text style={[styles.userEmail, { color: colors.textSecondary }]}>{user.email}</Text>
               
-              <View style={styles.statsContainer}>
-                <View style={styles.statItem}>
-                  <Text style={[styles.statNumber, { color: colors.primary }]}>{userPosts.length}</Text>
-                  <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Posts</Text>
-                </View>
-                <View style={[styles.statDivider, { backgroundColor: colors.border }]} />
-                <View style={styles.statItem}>
-                  <Text style={[styles.statNumber, { color: colors.primary }]}>0</Text>
-                  <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Followers</Text>
-                </View>
-                <View style={[styles.statDivider, { backgroundColor: colors.border }]} />
-                <View style={styles.statItem}>
-                  <Text style={[styles.statNumber, { color: colors.primary }]}>0</Text>
-                  <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Following</Text>
-                </View>
-              </View>
-
               <TouchableOpacity 
                 style={[styles.editProfileButton, { borderColor: colors.border }]}
               >
@@ -111,10 +89,10 @@ export default function ProfileScreen() {
 
         {user && (
           <>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>Your Posts</Text>
             
-            {userPosts.length > 0 ? (
-              userPosts.map((post) => (
+            
+            
+              
                 <View 
                   key={post.id} 
                   style={[styles.postCard, { backgroundColor: colors.card, borderColor: colors.border }]}
