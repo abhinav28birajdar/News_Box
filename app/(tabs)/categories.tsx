@@ -6,13 +6,21 @@ import { useTheme } from "@/context/theme-context";
 import { useNewsStore } from "@/store/news-store";
 import { categories } from "@/constants/categories";
 
+interface Category {
+  value: string;
+  label: string;
+  description: string;
+  imageUrl: string;
+  color: string;
+}
+
 export default function CategoriesScreen() {
   const router = useRouter();
   const { theme } = useTheme();
   const colors = theme.colors;
   const { setSelectedCategory } = useNewsStore();
 
-  const handleCategoryPress = (category) => {
+  const handleCategoryPress = (category: Category) => {
     setSelectedCategory(category.value);
     router.push("/");
   };

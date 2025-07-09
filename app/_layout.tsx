@@ -76,6 +76,16 @@ function RootLayoutNav() {
           presentation: "modal" 
         }} 
       />
+      <Stack.Screen 
+        name="chat-ai" 
+        options={{ 
+          headerShown: true,
+          headerTitle: "AI News Assistant",
+          headerBackTitle: "Back",
+          headerTintColor: "#3B82F6",
+          headerStyle: { backgroundColor: "#FFFFFF" },
+        }} 
+      />
     </Stack>
   );
 }

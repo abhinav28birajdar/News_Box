@@ -7,14 +7,16 @@ import {
   ActivityIndicator, 
   RefreshControl,
   TextInput,
-  TouchableOpacity
+  TouchableOpacity,
+  Linking
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Search, X } from "lucide-react-native";
 import { StatusBar } from "expo-status-bar";
 import { useTheme } from "@/context/theme-context";
-import { getTopHeadlines, searchNews } from "../../services/newsApi";
+import { getTopHeadlines, searchNews, Article } from "../../services/newsApi";
+import { Image } from "expo-image";
 
 interface Article {
   source: { id: string | null; name: string };
@@ -34,9 +36,10 @@ export default function HomeScreen() {
   const { theme } = useTheme();
   const colors = theme.colors;
   const [news, setNews] = useState<Article[]>([]);
+  const [filteredNews, setFilteredNews] = useState<Article[]>(news);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string>("");
 
   const fetchNews = async (category?: string, query?: string) => {
     setLoading(true);
@@ -59,7 +62,6 @@ export default function HomeScreen() {
   };
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [filteredNews, setFilteredNews] = useState<Article[]>(news);
 
   useEffect(() => {
     fetchNews(selectedCategory || undefined);
@@ -85,8 +87,8 @@ export default function HomeScreen() {
     setRefreshing(false);
   };
 
-  const handleArticlePress = (id: string) => {
-    router.push(`/article/${id}`);
+  const handleArticlePress = (url: string) => {
+    Linking.openURL(url);
   };
 
   const clearSearch = () => {
@@ -94,9 +96,12 @@ export default function HomeScreen() {
   };
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-      <StatusBar style={theme.dark ? "light" : "dark"} />
-      
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}> 
+      <StatusBar style="auto" />
+      <View style={styles.logoContainer}>
+        <Image source={require("../../assets/images/newsboxlogo1.png")} style={styles.logo} />
+      </View>
+
       <View style={styles.searchContainer}>
         <View style={[styles.searchBar, { backgroundColor: colors.card, borderColor: colors.border }]}>
           <Search size={20} color={colors.textSecondary} />
@@ -143,7 +148,7 @@ export default function HomeScreen() {
           data={filteredNews}
           keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => (
-            <NewsCard article={item} onPress={() => handleArticlePress(item.id)} />
+            <NewsCard article={item} onPress={() => handleArticlePress(item.url)} />
           )}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
@@ -169,9 +174,9 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
+  container: { flex: 1 },
+  logoContainer: { alignItems: "center", marginTop: -70, marginBottom: -20 },
+  logo: { width: 120, height: 120, resizeMode: "contain" },
   searchContainer: {
     paddingHorizontal: 16,
     paddingVertical: 8,
@@ -180,7 +185,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 12,
-    paddingVertical: 8,
+    paddingVertical: 2,
     borderRadius: 12,
     borderWidth: 1,
   },

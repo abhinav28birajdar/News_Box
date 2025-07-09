@@ -14,6 +14,7 @@ interface NewsCardProps {
       name: string;
     };
     category?: string;
+    url: string;
   };
   onPress: () => void;
 }
@@ -79,6 +80,7 @@ const styles = StyleSheet.create({
   image: {
     width: "100%",
     height: 180,
+    borderRadius: 8,
   },
   content: {
     padding: 16,

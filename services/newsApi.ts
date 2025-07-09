@@ -1,7 +1,7 @@
-const API_KEY = ""; // NewsAPI key placed here
+const API_KEY = ""; 
 const BASE_URL = "https://newsapi.org/v2";
 
-interface Article {
+export interface Article {
   id: string;
   source: { id: string | null; name: string };
   author: string | null;

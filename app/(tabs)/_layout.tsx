@@ -4,6 +4,12 @@ import { useColorScheme } from "react-native";
 import { Home, Compass, PlusSquare, User } from "lucide-react-native";
 import { useTheme } from "@/context/theme-context";
 
+
+const GEMINI_API_KEY = process.env.EXPO_PUBLIC_GEMINI_API_KEY || ""; 
+const GEMINI_API_URL =
+  "https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=" +
+  GEMINI_API_KEY;
+
 export default function TabLayout() {
   const { theme } = useTheme();
   const colors = theme.colors;
@@ -31,7 +37,7 @@ export default function TabLayout() {
         options={{
           title: "Home",
           tabBarIcon: ({ color }) => <Home size={22} color={color} />,
-          headerTitle: "News Box",
+          headerTitle: "",
         }}
       />
       <Tabs.Screen
@@ -56,6 +62,14 @@ export default function TabLayout() {
           title: "Profile",
           tabBarIcon: ({ color }) => <User size={22} color={color} />,
           headerTitle: "Profile",
+        }}
+      />
+      <Tabs.Screen
+        name="chat-ai"
+        options={{
+          title: "AI News",
+          tabBarIcon: ({ color }) => <Compass size={22} color={color} />, // You can use a different icon if you want
+          headerTitle: "AI News Assistant",
         }}
       />
     </Tabs>
