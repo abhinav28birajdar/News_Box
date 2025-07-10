@@ -2,27 +2,40 @@
 
 buildscript {
     ext {
+        // These versions are set to generally stable values for React Native projects targeting
+        // Android API 34 or 35.
+        // If you encounter issues, try:
+        // buildToolsVersion = "34.0.0"
+        // compileSdkVersion = Integer.parseInt(findProperty('android.compileSdkVersion') ?: '34')
+        // targetSdkVersion = Integer.parseInt(findProperty('android.targetSdkVersion') ?: '34')
+        
         buildToolsVersion = findProperty('android.buildToolsVersion') ?: '35.0.0'
         minSdkVersion = Integer.parseInt(findProperty('android.minSdkVersion') ?: '24')
         compileSdkVersion = Integer.parseInt(findProperty('android.compileSdkVersion') ?: '35')
-        targetSdkVersion = Integer.parseInt(findProperty('android.targetSdkVersion') ?: '34')
+        targetSdkVersion = Integer.parseInt(findProperty('android.targetSdkVersion') ?: '34') // API 34 is generally stable for React Native at the moment.
         kotlinVersion = findProperty('android.kotlinVersion') ?: '1.9.25'
 
-        ndkVersion = "26.1.10909125"
+        // NDK version is important for native modules.
+        ndkVersion = "26.1.10909125" // Keep this as you provided
     }
     repositories {
         google()
         mavenCentral()
     }
     dependencies {
-        classpath('com.android.tools.build:gradle')
+        // Android Gradle Plugin (AGP) version.
+        // For compileSdkVersion 35, you'd typically need a very recent AGP.
+        // As of July 2025, AGP 8.11.0 is a strong candidate for API 35/34 compatibility.
+        classpath("com.android.tools.build:gradle:8.11.0") 
         classpath('com.facebook.react:react-native-gradle-plugin')
         classpath('org.jetbrains.kotlin:kotlin-gradle-plugin')
     }
 }
 
+// Apply the React Native root project plugin.
 apply plugin: "com.facebook.react.rootproject"
 
+// Define repositories for all modules in the project.
 allprojects {
     repositories {
         maven {
@@ -30,12 +43,17 @@ allprojects {
             url(new File(['node', '--print', "require.resolve('react-native/package.json')"].execute(null, rootDir).text.trim(), '../android'))
         }
         maven {
-            // Android JSC is installed from npm
+            // Android JSC (JavaScriptCore) is installed from npm
             url(new File(['node', '--print', "require.resolve('jsc-android/package.json', { paths: [require.resolve('react-native/package.json')] })"].execute(null, rootDir).text.trim(), '../dist'))
         }
 
-        google()
-        mavenCentral()
-        maven { url 'https://www.jitpack.io' }
+        google() // Google's Maven repository
+        mavenCentral() // Maven Central repository
+        maven { url 'https://www.jitpack.io' } // Often used by some React Native libraries
     }
+}
+
+// Clean task for the entire project.
+tasks.register('clean', Delete) {
+    delete rootProject.buildDir
 }

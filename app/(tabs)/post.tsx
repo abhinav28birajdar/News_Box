@@ -13,7 +13,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
-import { CameraView, CameraType } from "expo-camera";
+import { CameraView, CameraType, CameraViewRef } from "expo-camera"; // Import CameraViewRef
 import { Camera, X, Check, Image as ImageIcon } from "lucide-react-native";
 import { useTheme } from "@/context/theme-context";
 import { useNewsStore } from "@/store/news-store";
@@ -25,15 +25,15 @@ export default function PostNewsScreen() {
   const colors = theme.colors;
   const { addNews } = useNewsStore();
   const router = useRouter();
-  
+
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [category, setCategory] = useState("");
-  const [image, setImage] = useState(null);
+  const [image, setImage] = useState<string | null>(null); // Corrected: image can be string or null
   const [showCamera, setShowCamera] = useState(false);
   const [cameraType, setCameraType] = useState<CameraType>("back");
   const [permission, requestPermission] = ImagePicker.useCameraPermissions();
-  const cameraRef = useRef(null);
+  const cameraRef = useRef<CameraViewRef>(null); // Corrected: Explicitly type cameraRef
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -56,7 +56,7 @@ export default function PostNewsScreen() {
         return;
       }
     }
-    
+
     setShowCamera(true);
   };
 
@@ -111,7 +111,7 @@ export default function PostNewsScreen() {
     };
 
     addNews(newArticle);
-    
+
     Alert.alert(
       "Success",
       "Your news has been posted successfully!",
@@ -140,14 +140,14 @@ export default function PostNewsScreen() {
             >
               <X size={24} color="#fff" />
             </TouchableOpacity>
-            
+
             <TouchableOpacity
               style={[styles.cameraButton, { backgroundColor: colors.primary }]}
               onPress={handleCapture}
             >
               <Check size={24} color="#fff" />
             </TouchableOpacity>
-            
+
             <TouchableOpacity
               style={[styles.cameraButton, { backgroundColor: colors.card }]}
               onPress={toggleCameraType}
@@ -178,7 +178,7 @@ export default function PostNewsScreen() {
             <TextInput
               style={[
                 styles.input,
-                { 
+                {
                   backgroundColor: colors.card,
                   color: colors.text,
                   borderColor: colors.border,
@@ -194,7 +194,7 @@ export default function PostNewsScreen() {
             <TextInput
               style={[
                 styles.textArea,
-                { 
+                {
                   backgroundColor: colors.card,
                   color: colors.text,
                   borderColor: colors.border,
@@ -210,8 +210,8 @@ export default function PostNewsScreen() {
             />
 
             <Text style={[styles.label, { color: colors.text }]}>Category</Text>
-            <ScrollView 
-              horizontal 
+            <ScrollView
+              horizontal
               showsHorizontalScrollIndicator={false}
               style={styles.categoriesContainer}
             >
@@ -220,7 +220,7 @@ export default function PostNewsScreen() {
                   key={cat.value}
                   style={[
                     styles.categoryPill,
-                    { 
+                    {
                       backgroundColor: category === cat.value ? cat.color : colors.card,
                       borderColor: colors.border,
                     }
@@ -268,7 +268,7 @@ export default function PostNewsScreen() {
                     Take Photo
                   </Text>
                 </TouchableOpacity>
-                
+
                 <TouchableOpacity
                   style={[
                     styles.imageButton,
