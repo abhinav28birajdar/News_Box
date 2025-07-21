@@ -6,12 +6,14 @@ import { useRouter } from "expo-router";
 import { LogOut, Moon, Sun, Settings, Edit3 } from "lucide-react-native";
 import { useTheme } from "@/context/theme-context";
 import { useAuth } from "@/context/AuthContext";
+import { useNewsStore } from "@/store/news-store";
 
 export default function ProfileScreen() {
   const router = useRouter();
   const { theme, toggleTheme } = useTheme();
   const colors = theme.colors;
   const { user, profile, signOut } = useAuth();
+  const { userNews } = useNewsStore();
 
   const handleLogout = async () => {
     Alert.alert(
@@ -89,36 +91,37 @@ export default function ProfileScreen() {
 
         {user && (
           <>
-            
-            
-            
-              
-                <View 
-                  key={post.id} 
-                  style={[styles.postCard, { backgroundColor: colors.card, borderColor: colors.border }]}
-                >
-                  <Image
-                    source={{ uri: post.urlToImage }}
-                    style={styles.postImage}
-                    contentFit="cover"
-                  />
-                  <View style={styles.postContent}>
-                    <Text style={[styles.postTitle, { color: colors.text }]}>
-                      {post.title}
-                    </Text>
-                    <Text style={[styles.postDate, { color: colors.textSecondary }]}>
-                      {new Date(post.publishedAt).toLocaleDateString()}
-                    </Text>
+            <View style={[styles.postsSection, { backgroundColor: colors.card, borderColor: colors.border }]}>
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>Your Posts</Text>
+              {userNews.length > 0 ? (
+                userNews.map((post) => (
+                  <View 
+                    key={post.id} 
+                    style={[styles.postCard, { backgroundColor: colors.card, borderColor: colors.border }]}
+                  >
+                    <Image
+                      source={{ uri: post.urlToImage }}
+                      style={styles.postImage}
+                      contentFit="cover"
+                    />
+                    <View style={styles.postContent}>
+                      <Text style={[styles.postTitle, { color: colors.text }]}>
+                        {post.title}
+                      </Text>
+                      <Text style={[styles.postDate, { color: colors.textSecondary }]}>
+                        {new Date(post.publishedAt).toLocaleDateString()}
+                      </Text>
+                    </View>
                   </View>
+                ))
+              ) : (
+                <View style={[styles.emptyState, { backgroundColor: colors.card, borderColor: colors.border }]}>
+                  <Text style={[styles.emptyStateText, { color: colors.textSecondary }]}>
+                    You haven't posted any news yet
+                  </Text>
                 </View>
-              ))
-            ) : (
-              <View style={[styles.emptyState, { backgroundColor: colors.card, borderColor: colors.border }]}>
-                <Text style={[styles.emptyStateText, { color: colors.textSecondary }]}>
-                  You haven't posted any news yet
-                </Text>
-              </View>
-            )}
+              )}
+            </View>
 
             <View style={styles.settingsSection}>
               <TouchableOpacity 
@@ -157,6 +160,11 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: "700",
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    marginBottom: 16,
   },
   themeToggle: {
     width: 40,
@@ -239,16 +247,17 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
   },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    marginBottom: 16,
-  },
   postCard: {
     flexDirection: "row",
     borderRadius: 12,
     overflow: "hidden",
     marginBottom: 16,
+    borderWidth: 1,
+  },
+  postsSection: {
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 24,
     borderWidth: 1,
   },
   postImage: {

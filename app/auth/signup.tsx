@@ -82,9 +82,9 @@ export default function SignupScreen() {
 
         <View style={styles.logoContainer}>
           <Image
-            source={{ uri: "https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=1000&auto=format&fit=crop" }}
+            source={require("../../assets/images/newsboxlogo1.png")}
             style={styles.logo}
-            contentFit="cover"
+            contentFit="contain"
           />
         </View>
 

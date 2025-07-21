@@ -1,4 +1,5 @@
 const API_KEY = "";
+const BASE_URL = "https://newsapi.org/v2";
 
 export interface Article {
   id: string;

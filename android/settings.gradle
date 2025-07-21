@@ -21,7 +21,7 @@ extensions.configure(com.facebook.react.ReactSettingsExtension) { ex ->
   }
 }
 
-rootProject.name = 'Newsapp'
+rootProject.name = 'News App'
 
 dependencyResolutionManagement {
   versionCatalogs {

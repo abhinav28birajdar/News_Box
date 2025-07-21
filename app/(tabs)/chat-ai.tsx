@@ -18,13 +18,28 @@ export default function ChatAIPage() {
   const [error, setError] = useState<string | null>(null);
 
   const fetchAINews = async () => {
+    if (!input.trim()) {
+      setError("Please enter a search query");
+      return;
+    }
+    
     setLoading(true);
     setError(null);
+    setNews([]); // Clear previous results
+    
     try {
-      const aiNews = await GeminiAPI.getLatestNews(input);
-      setNews(aiNews);
-    } catch (e) {
-      setError("Failed to fetch AI news.");
+      console.log("Fetching AI news for query:", input);
+      const aiNews = await GeminiAPI.getLatestNews(input.trim());
+      console.log("Received AI news:", aiNews);
+      
+      if (aiNews && aiNews.length > 0) {
+        setNews(aiNews);
+      } else {
+        setError("No news found for your query. Try a different search term.");
+      }
+    } catch (error: any) {
+      console.error("Error in fetchAINews:", error);
+      setError(error.message || "Failed to fetch AI news. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -42,12 +57,27 @@ export default function ChatAIPage() {
           value={input}
           onChangeText={setInput}
         />
-        <TouchableOpacity style={styles.button} onPress={fetchAINews} disabled={loading}>
-          <Text style={styles.buttonText}>{loading ? "..." : "Ask"}</Text>
+        <TouchableOpacity 
+          style={[styles.button, { backgroundColor: colors.primary }]} 
+          onPress={fetchAINews} 
+          disabled={loading || !input.trim()}
+        >
+          <Text style={styles.buttonText}>{loading ? "Searching..." : "Ask AI"}</Text>
         </TouchableOpacity>
       </View>
-      {error && <Text style={styles.error}>{error}</Text>}
-      {loading && <ActivityIndicator color={colors.primary} style={{ marginTop: 20 }} />}
+      {error && (
+        <View style={[styles.errorContainer, { backgroundColor: colors.card, borderColor: colors.error }]}>
+          <Text style={[styles.error, { color: colors.error }]}>{error}</Text>
+        </View>
+      )}
+      {loading && <ActivityIndicator color={colors.primary} style={{ marginTop: 20 }} size="large" />}
+      
+      {news.length > 0 && (
+        <Text style={[styles.resultsHeader, { color: colors.text }]}>
+          Found {news.length} news articles:
+        </Text>
+      )}
+      
       <FlatList
         data={news}
         keyExtractor={(item, idx) => item.url || idx.toString()}
@@ -56,11 +86,14 @@ export default function ChatAIPage() {
             <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}> 
               <Text style={[styles.cardTitle, { color: colors.text }]}>{item.title}</Text>
               <Text style={[styles.cardDesc, { color: colors.textSecondary }]}>{item.description}</Text>
-              <Text style={[styles.cardUrl, { color: colors.primary }]}>{item.url}</Text>
+              <Text style={[styles.cardUrl, { color: colors.primary }]} numberOfLines={1}>
+                🔗 {item.url}
+              </Text>
             </View>
           </TouchableOpacity>
         )}
-        style={{ marginTop: 20 }}
+        style={{ marginTop: 16 }}
+        showsVerticalScrollIndicator={false}
       />
     </View>
   );
@@ -75,6 +108,19 @@ const styles = StyleSheet.create({
   button: { backgroundColor: "#3B82F6", padding: 12, borderRadius: 8 },
   buttonText: { color: "#fff", fontWeight: "bold" },
   error: { color: "red", marginTop: 10 },
+  errorContainer: { 
+    borderWidth: 1, 
+    borderRadius: 8, 
+    padding: 12, 
+    marginTop: 10,
+    marginBottom: 10
+  },
+  resultsHeader: {
+    fontSize: 16,
+    fontWeight: "600",
+    marginTop: 16,
+    marginBottom: 8
+  },
   card: { borderWidth: 1, borderRadius: 12, padding: 12, marginBottom: 12 },
   cardTitle: { fontSize: 16, fontWeight: "bold" },
   cardDesc: { fontSize: 14, marginTop: 4 },

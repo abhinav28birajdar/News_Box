@@ -1,27 +1,29 @@
 {
   "expo": {
-    "name": "News_app",
+    "name": "News Box",
     "slug": "News_app",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
-    "scheme": "myapp",
+    "icon": "./assets/images/splash-icon.png",
+    "scheme": "newsapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.iabhinavv28.newsapp"
     },
     "android": {
+      "icon": "./assets/images/splash-icon.png",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "foregroundImage": "./assets/images/splash-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.iabhinavv28.News_app"
+      "package": "com.iabhinavv28.newsapp"
     },
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/splash-icon.png"
     },
     "plugins": [
       "expo-router",
@@ -36,6 +38,14 @@
       ],
       "expo-secure-store"
     ],
+    "hooks": {
+      "postPublish": [
+        {
+          "file": "expo-optimize",
+          "config": {}
+        }
+      ]
+    },
     "experiments": {
       "typedRoutes": true
     },

@@ -17,17 +17,6 @@ import { StatusBar } from "expo-status-bar";
 import { useTheme } from "@/context/theme-context";
 import { getTopHeadlines, searchNews, Article } from "../../services/newsApi";
 import { Image } from "expo-image";
-
-interface Article {
-  source: { id: string | null; name: string };
-  author: string | null;
-  title: string;
-  description: string | null;
-  url: string;
-  urlToImage: string | null;
-  publishedAt: string;
-  content: string | null;
-}
 import NewsCard from "@/components/NewsCard";
 import CategoryPills from "@/components/CategoryPills";
 
@@ -88,7 +77,7 @@ export default function HomeScreen() {
   };
 
   const handleArticlePress = (url: string) => {
-    Linking.openURL(url);
+    router.push(`/article/${encodeURIComponent(url)}`);
   };
 
   const clearSearch = () => {
@@ -136,7 +125,7 @@ export default function HomeScreen() {
           </Text>
           <TouchableOpacity 
             style={[styles.retryButton, { backgroundColor: colors.primary }]} 
-            onPress={fetchNews}
+            onPress={() => fetchNews()}
           >
             <Text style={[styles.retryButtonText, { color: colors.white }]}>
               Retry
@@ -146,9 +135,16 @@ export default function HomeScreen() {
       ) : (
         <FlatList
           data={filteredNews}
-          keyExtractor={(item) => item.id.toString()}
+          keyExtractor={(item, index) => item.url || `article-${index}`}
           renderItem={({ item }) => (
-            <NewsCard article={item} onPress={() => handleArticlePress(item.url)} />
+            <NewsCard 
+              article={{
+                ...item,
+                description: item.description || "No description available",
+                urlToImage: item.urlToImage || ""
+              }} 
+              onPress={() => handleArticlePress(item.url)} 
+            />
           )}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}

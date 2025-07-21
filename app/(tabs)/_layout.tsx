@@ -1,7 +1,7 @@
 import React from "react";
 import { Tabs } from "expo-router";
 import { useColorScheme } from "react-native";
-import { Home, Compass, PlusSquare, User } from "lucide-react-native";
+import { Home, Compass, PlusSquare, User, Bot } from "lucide-react-native";
 import { useTheme } from "@/context/theme-context";
 
 
@@ -68,7 +68,7 @@ export default function TabLayout() {
         name="chat-ai"
         options={{
           title: "AI News",
-          tabBarIcon: ({ color }) => <Compass size={22} color={color} />, // You can use a different icon if you want
+          tabBarIcon: ({ color }) => <Bot size={22} color={color} />,
           headerTitle: "AI News Assistant",
         }}
       />

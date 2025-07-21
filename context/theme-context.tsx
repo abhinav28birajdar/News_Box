@@ -7,7 +7,7 @@ type ThemeType = "light" | "dark" | "system";
 
 interface ThemeContextType {
   themeType: ThemeType;
-  theme: typeof lightTheme | typeof darkTheme;
+  theme: (typeof lightTheme | typeof darkTheme) & { dark: boolean };
   setThemeType: (theme: ThemeType) => void;
   toggleTheme: () => void;
 }

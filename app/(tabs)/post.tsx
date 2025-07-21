@@ -13,7 +13,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
-import { CameraView, CameraType, CameraViewRef } from "expo-camera"; // Import CameraViewRef
+import { CameraView, CameraType, useCameraPermissions } from "expo-camera";
 import { Camera, X, Check, Image as ImageIcon } from "lucide-react-native";
 import { useTheme } from "@/context/theme-context";
 import { useNewsStore } from "@/store/news-store";
@@ -32,8 +32,8 @@ export default function PostNewsScreen() {
   const [image, setImage] = useState<string | null>(null); // Corrected: image can be string or null
   const [showCamera, setShowCamera] = useState(false);
   const [cameraType, setCameraType] = useState<CameraType>("back");
-  const [permission, requestPermission] = ImagePicker.useCameraPermissions();
-  const cameraRef = useRef<CameraViewRef>(null); // Corrected: Explicitly type cameraRef
+  const [permission, requestPermission] = useCameraPermissions();
+  const cameraRef = useRef<CameraView>(null);
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -63,9 +63,13 @@ export default function PostNewsScreen() {
   const handleCapture = async () => {
     if (cameraRef.current) {
       try {
-        const photo = await cameraRef.current.takePictureAsync();
-        setImage(photo.uri);
-        setShowCamera(false);
+        const photo = await cameraRef.current.takePictureAsync({
+          quality: 0.8,
+        });
+        if (photo) {
+          setImage(photo.uri);
+          setShowCamera(false);
+        }
       } catch (error) {
         console.error("Error taking picture:", error);
         Alert.alert("Error", "Failed to take picture");

@@ -1,9 +1,24 @@
 // context/AuthContext.tsx
 import React, { createContext, useState, useEffect, useContext, ReactNode } from 'react';
-import { User } from 'firebase/auth';
 import { auth, db } from '../firebaseConfig'; // Adjust path if needed
-import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { Alert } from 'react-native';
+
+// Import Firebase functions
+import { 
+  signInWithEmailAndPassword, 
+  createUserWithEmailAndPassword, 
+  signOut as firebaseSignOut, 
+  onAuthStateChanged,
+  User as FirebaseUser
+} from 'firebase/auth';
+import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
+
+// Firebase types - use any for now to avoid type issues
+interface User {
+  uid: string;
+  email: string | null;
+  displayName?: string | null;
+}
 
 // Define a Profile interface for user data stored in Firestore
 interface Profile {
@@ -58,7 +73,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(async (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser: any) => {
       setUser(currentUser);
       if (currentUser) {
         await fetchProfile(currentUser.uid);
@@ -74,7 +89,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const signInWithPassword = async (email: string, password: string): Promise<boolean> => {
     setLoadingAuthAction(true);
     try {
-      await auth.signInWithEmailAndPassword(email, password);
+      await signInWithEmailAndPassword(auth, email, password);
       return true;
     } catch (error: any) {
       Alert.alert("Sign In Failed", error.message);
@@ -87,7 +102,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const signUpWithPassword = async (email: string, password: string, username: string): Promise<boolean> => {
     setLoadingAuthAction(true);
     try {
-      const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       if (userCredential.user) {
         await setDoc(doc(db, "profiles", userCredential.user.uid), {
           username: username,
@@ -108,7 +123,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const signOut = async () => {
     setLoadingAuthAction(true);
     try {
-      await auth.signOut();
+      await firebaseSignOut(auth);
       Alert.alert("Signed Out", "You have been signed out.");
     } catch (error: any) {
       Alert.alert("Sign Out Failed", error.message);

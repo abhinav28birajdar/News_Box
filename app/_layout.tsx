@@ -77,6 +77,13 @@ function RootLayoutNav() {
         }} 
       />
       <Stack.Screen 
+        name="auth/forgot-password" 
+        options={{ 
+          headerShown: false,
+          presentation: "modal" 
+        }} 
+      />
+      <Stack.Screen 
         name="chat-ai" 
         options={{ 
           headerShown: true,
