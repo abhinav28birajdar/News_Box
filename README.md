@@ -5,6 +5,8 @@
 ![News App Banner](assets/images/newsboxlogo1.png)
 
 ---
+<!-- Uploading "samsung-galaxy-slow-reveal.mp4"... -->
+---
 
 ## ✨ Key Features
 
